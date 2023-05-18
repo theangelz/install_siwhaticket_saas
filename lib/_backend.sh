@@ -6,24 +6,7 @@
 # Arguments:
 #   None
 #######################################
-backend_redis_create() {
-  print_banner
-  printf "${WHITE} 💻 Criando Banco Postgres...${GRAY_LIGHT}"
-  printf "\n\n"
 
-  sleep 2
-  sudo su - postgres <<EOF
-    createdb ${instancia_add};
-    psql
-    CREATE USER ${instancia_add} SUPERUSER INHERIT CREATEDB CREATEROLE;
-    ALTER USER ${instancia_add} PASSWORD '${mysql_root_password}';
-    \q
-    exit
-EOF
-
-sleep 2
-
-}
 
 #######################################
 # sets environment variable for backend.
@@ -56,21 +39,20 @@ PROXY_PORT=443
 PORT=${backend_port}
 
 DB_HOST=localhost
-DB_DIALECT=postgres
-DB_PORT=5432
-DB_USER=${instancia_add}
-DB_PASS=${mysql_root_password}
+DB_DIALECT=mysql
+DB_USER=root
+DB_PASS=
 DB_NAME=${instancia_add}
 
 JWT_SECRET=${jwt_secret}
 JWT_REFRESH_SECRET=${jwt_refresh_secret}
 
-REDIS_URI=redis://${mysql_root_password}@127.0.0.1:6379
+REDIS_URI=redis://:${mysql_root_password}@127.0.0.1:${redis_port}
 REDIS_OPT_LIMITER_MAX=1
 REGIS_OPT_LIMITER_DURATION=3000
 
-USER_LIMIT=10000
-CONNECTIONS_LIMIT=10000
+USER_LIMIT=${max_user}
+CONNECTIONS_LIMIT=${max_whats}
 CLOSED_SEND_BY_ME=true
 
 [-]EOF
@@ -94,6 +76,8 @@ backend_node_dependencies() {
   sudo su - deploy <<EOF
   cd /home/deploy/${instancia_add}/backend
   npm install
+  npm install --save mysql
+  npm install --save axios
 EOF
 
   sleep 2
